@@ -13,12 +13,6 @@ package org.eclipse.draw2d.parts;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Display;
-
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
@@ -27,6 +21,12 @@ import org.eclipse.draw2d.ScaledGraphics;
 import org.eclipse.draw2d.UpdateListener;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.internal.DPIUtil;
+import org.eclipse.swt.widgets.Display;
 
 /**
  * A Thumbnail is a Figure that displays an image of its source Figure at a
@@ -36,7 +36,7 @@ import org.eclipse.draw2d.geometry.Rectangle;
  * @author Eric Bordeau
  * @author Alexander Nyßen (anyssen)
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "restriction"})
 public class Thumbnail extends Figure implements UpdateListener {
     
     // Bug on Mac - images are cached
@@ -186,11 +186,6 @@ public class Thumbnail extends Figure implements UpdateListener {
             int sx1 = h * tileSize.width;
             int sx2 = Math.min((h + 1) * tileSize.width, sourceSize.width);
             
-            // Mac hack - create new Tile Graphics instances
-            if(useMacFix) {
-                createTileGraphics();
-            }
-
             theGraphics.pushState();
             // clear the background (by filling with the background color)
             Rectangle rect = new Rectangle(0, 0, sx2 - sx1, sy2 - sy1);
@@ -211,9 +206,24 @@ public class Thumbnail extends Figure implements UpdateListener {
             sourceFigure.paint(theGraphics);
             theGraphics.popState();
 
-            // Copy the painted tile image into the thumbnail image.
-            thumbnailGC.drawImage(tileImage, 0, 0, sx2 - sx1, sy2 - sy1, sx1,
-                    sy1, sx2 - sx1, sy2 - sy1);
+            if(useMacFix) {
+                // Don't re-use the same tileImage, so copy it
+                Image tileImageCopy = new Image(tileImage.getDevice(),
+                        new DPIUtil.AutoScaleImageDataProvider(tileImage.getDevice(),
+                                tileImage.getImageData(DPIUtil.getDeviceZoom()),
+                                DPIUtil.getDeviceZoom()));
+                
+                // Copy the painted tile image into the thumbnail image.
+                thumbnailGC.drawImage(tileImageCopy, 0, 0, sx2 - sx1, sy2 - sy1, sx1,
+                        sy1, sx2 - sx1, sy2 - sy1);
+                
+                tileImageCopy.dispose();
+            }
+            else {
+                // Copy the painted tile image into the thumbnail image.
+                thumbnailGC.drawImage(tileImage, 0, 0, sx2 - sx1, sy2 - sy1, sx1,
+                        sy1, sx2 - sx1, sy2 - sy1);
+            }
 
             if (getCurrentHTile() < (hTiles - 1))
                 setCurrentHTile(getCurrentHTile() + 1);
@@ -295,35 +305,9 @@ public class Thumbnail extends Figure implements UpdateListener {
                 resetTileImage();
             }
 
-            createTileGraphics();
-
-            setScales(targetSize.width / (float) sourceSize.width,
-                    targetSize.height / (float) sourceSize.height);
-
-            Display.getCurrent().asyncExec(this);
-        }
-        
-        /**
-         * Create a new TileGCGraphics, SWTGraphics, ScaledGraphics and so on
-         */
-        private void createTileGraphics() {
-            // For the Mac hack we have to create a new GC instance to flush the previous tile image...
-            if(tileGC != null && !tileGC.isDisposed()) {
-                tileGC.dispose();
-            }
             tileGC = new GC(tileImage,
                     sourceFigure.isMirrored() ? SWT.RIGHT_TO_LEFT : SWT.NONE);
-
-            // ...and this means we need a new SWTGraphics instance
-            if(tileGCGraphics != null) {
-                tileGCGraphics.dispose();
-            }
             tileGCGraphics = new SWTGraphics(tileGC);
-            
-            // ...and a new ScaledGraphics instance
-            if(tileGraphics != null) {
-                tileGraphics.dispose();
-            }
             if(useScaledGraphics) {
                 tileGraphics = new ScaledGraphics(tileGCGraphics);
                 theGraphics = tileGraphics;
@@ -339,6 +323,11 @@ public class Thumbnail extends Figure implements UpdateListener {
             if (color != null)
                 theGraphics.setBackgroundColor(color);
             theGraphics.setFont(sourceFigure.getFont());
+
+            setScales(targetSize.width / (float) sourceSize.width,
+                    targetSize.height / (float) sourceSize.height);
+
+            Display.getCurrent().asyncExec(this);
         }
 
         private void resetThumbnailImage() {
