@@ -5,6 +5,7 @@
     <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
         <repository location="https://download.eclipse.org/releases/2023-03"/>
         <unit id="org.eclipse.sdk.feature.group" version="4.27.0.v20230302-0300"/>
+        <unit id="org.eclipse.equinox.sdk.feature.group" version="3.23.700.v20230220-1352"/>
         <unit id="org.eclipse.emf.compare.feature.group" version="3.3.21.202212280858"/>
         <unit id="org.eclipse.jgit.feature.group" version="6.5.0.202303070854-r"/>
         <unit id="org.eclipse.jgit.ssh.apache.feature.group" version="6.5.0.202303070854-r"/>
