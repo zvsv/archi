@@ -97,23 +97,39 @@ public class ArchimateDiagramEditorPalette extends AbstractPaletteRoot {
         
         // Note
         ToolEntry noteEntry = new ExtCombinedTemplateCreationEntry(
-                Messages.ArchimateDiagramEditorPalette_2,
+                ArchiLabelProvider.INSTANCE.getDefaultName(IArchimatePackage.eINSTANCE.getDiagramModelNote()),
                 Messages.ArchimateDiagramEditorPalette_3,
                 new ArchimateDiagramModelFactory(IArchimatePackage.eINSTANCE.getDiagramModelNote()),
                 IArchiImages.ImageFactory.getImageDescriptor(IArchiImages.ICON_NOTE),
-                IArchiImages.ImageFactory.getImageDescriptor(IArchiImages.ICON_NOTE));
+                IArchiImages.ImageFactory.getImageDescriptor(IArchiImages.ICON_NOTE)) {
+            
+            @Override
+            public String getDescription() {
+                return super.getDescription() + getAcceleratorText(this);
+            }
+        };
+        
+        noteEntry.setToolProperty(PaletteKeyHandler.KEY_NAME, IArchimatePackage.eINSTANCE.getDiagramModelNote().getName());
         group.add(noteEntry);
         
         // Group
         ToolEntry groupEntry = new ExtCombinedTemplateCreationEntry(
-                Messages.ArchimateDiagramEditorPalette_4,
+                ArchiLabelProvider.INSTANCE.getDefaultName(IArchimatePackage.eINSTANCE.getDiagramModelGroup()),
                 Messages.ArchimateDiagramEditorPalette_5,
                 new ArchimateDiagramModelFactory(IArchimatePackage.eINSTANCE.getDiagramModelGroup()),
                 IArchiImages.ImageFactory.getImageDescriptor(IArchiImages.ICON_GROUP),
-                IArchiImages.ImageFactory.getImageDescriptor(IArchiImages.ICON_GROUP));
+                IArchiImages.ImageFactory.getImageDescriptor(IArchiImages.ICON_GROUP)) {
+          
+            @Override
+            public String getDescription() {
+                return super.getDescription() + getAcceleratorText(this);
+            }
+        };
+        
+        groupEntry.setToolProperty(PaletteKeyHandler.KEY_NAME, IArchimatePackage.eINSTANCE.getDiagramModelGroup().getName());
         group.add(groupEntry);
         
-        // Note Connection
+        // Connection
         ToolEntry entry = createConnectionCreationToolEntry(
                 IArchimatePackage.eINSTANCE.getDiagramModelConnection(),
                 Messages.ArchimateDiagramEditorPalette_7);
@@ -143,10 +159,17 @@ public class ArchimateDiagramEditorPalette extends AbstractPaletteRoot {
                 Messages.ArchimateDiagramEditorPalette_15,
                 new MagicConnectionModelFactory(),
                 IArchiImages.ImageFactory.getImageDescriptor(IArchiImages.ICON_MAGIC_CONNECTION),
-                IArchiImages.ImageFactory.getImageDescriptor(IArchiImages.ICON_MAGIC_CONNECTION));
+                IArchiImages.ImageFactory.getImageDescriptor(IArchiImages.ICON_MAGIC_CONNECTION)) {
+            
+            @Override
+            public String getDescription() {
+                return super.getDescription() + getAcceleratorText(this);
+            }
+        };
 
         magicConnectionEntry.setToolClass(MagicConnectionCreationTool.class);
         magicConnectionEntry.setToolProperty(AbstractTool.PROPERTY_UNLOAD_WHEN_FINISHED, true);
+        magicConnectionEntry.setToolProperty(PaletteKeyHandler.KEY_NAME, "MagicConnector"); //$NON-NLS-1$
         group.add(magicConnectionEntry);
 
         // Relations
@@ -331,7 +354,15 @@ public class ArchimateDiagramEditorPalette extends AbstractPaletteRoot {
                 description,
                 new ArchimateDiagramModelFactory(eClass),
                 ArchiLabelProvider.INSTANCE.getImageDescriptor(eClass),
-                ArchiLabelProvider.INSTANCE.getImageDescriptor(eClass));
+                ArchiLabelProvider.INSTANCE.getImageDescriptor(eClass)) {
+            
+            @Override
+            public String getDescription() {
+                return super.getDescription() + getAcceleratorText(this);
+            }
+        };
+        
+        entry.setToolProperty(PaletteKeyHandler.KEY_NAME, eClass.getName());
         
         return entry;
     }
@@ -342,11 +373,27 @@ public class ArchimateDiagramEditorPalette extends AbstractPaletteRoot {
                 description,
                 new ArchimateDiagramModelFactory(eClass),
                 ArchiLabelProvider.INSTANCE.getImageDescriptor(eClass),
-                ArchiLabelProvider.INSTANCE.getImageDescriptor(eClass));
+                ArchiLabelProvider.INSTANCE.getImageDescriptor(eClass)) {
+            
+            @Override
+            public String getDescription() {
+                return super.getDescription() + getAcceleratorText(this);
+            }
+        };
         
         // Ensure Tool gets deselected
         entry.setToolProperty(AbstractTool.PROPERTY_UNLOAD_WHEN_FINISHED, true);
         
+        entry.setToolProperty(PaletteKeyHandler.KEY_NAME, eClass.getName());
+        
         return entry;
+    }
+    
+    private String getAcceleratorText(ToolEntry toolEntry) {
+        if(toolEntry.getToolProperty(PaletteKeyHandler.KEY_NAME) instanceof String key) {
+            String text = PaletteKeyHandler.getAcceleratorText(key);
+            return text != null ? " (" + text + ")" : ""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        }
+        return ""; //$NON-NLS-1$
     }
 }
