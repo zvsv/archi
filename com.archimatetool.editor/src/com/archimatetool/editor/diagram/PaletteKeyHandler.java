@@ -41,6 +41,7 @@ public class PaletteKeyHandler extends AbstractHandler implements IParameterValu
     public static final String COMMAND_ID = "com.archimatetool.editor.palette.command"; //$NON-NLS-1$
     public static final String PARAMETER_ID = "com.archimatetool.editor.palette.command.params"; //$NON-NLS-1$
     public static final String KEY_NAME = "keyName"; //$NON-NLS-1$
+    public static final String CONTEXT_ID = "com.archimatetool.editor.view.context"; //$NON-NLS-1$
     
     private static Map<String, String> paramValues;
     
